@@ -49,21 +49,21 @@ module fpmult #(parameter int P = 8, parameter int Q = 24) (
     //state
     logic [1:0] state, next_state;
 
-    always_ff @(posedge clk_in) begin
+    always @(posedge clk_in) begin
     if (start_in && state == 2'b00) begin
         x_latched <= x_in;
         y_latched <= y_in;
         end
     end
 
-   always_ff @(posedge clk_in) begin
+   always @(posedge clk_in) begin
        if (!rst_in_N)
            state <= 2'b00;
        else
            state <= next_state;
    end
 
-   always_comb begin
+   always @(*) begin
        case (state)
            2'b00: next_state = start_in ? 2'b01 : 2'b00;
            2'b01: next_state = 2'b10;
@@ -72,13 +72,13 @@ module fpmult #(parameter int P = 8, parameter int Q = 24) (
        endcase
    end
 
-    always_comb begin
+    always @(*) begin
        ready_out = (state == 2'b00);
        valid_out = (state == 2'b10);
    end
 
     //comb logic for compute state
-    always_comb begin
+    always @(*) begin
         //extract
         sign_x = x_latched[TOTAL_BITS-1];
         sign_y = y_latched[TOTAL_BITS-1];
@@ -172,7 +172,7 @@ module fpmult #(parameter int P = 8, parameter int Q = 24) (
             if(exp_normalized <= 0 && !overflow) begin
                 shift_by = 1 - exp_normalized; //how much to shift by to fix sig
 
-                if (shift_by > signed'(FRAC_BITS)) begin //we're shifting by more bits than we habe
+                if (shift_by > $signed(FRAC_BITS)) begin //we're shifting by more bits than we habe
                     sig_rounded = '0;
                     underflow = 1'b1;
                 end else begin
@@ -203,7 +203,7 @@ module fpmult #(parameter int P = 8, parameter int Q = 24) (
     end 
 
     //latch outputs to p_out and oor_out
-    always_ff @(posedge clk_in) begin
+    always @(posedge clk_in) begin
         if (!rst_in_N) begin
             p_out <= '0;
             oor_out <= '0;
